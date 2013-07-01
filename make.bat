@@ -10,3 +10,4 @@
 %BASHPATH% --login -c "cd %PROJECTDIR% && %NDKDIR%
 
 @pause:
+lll
