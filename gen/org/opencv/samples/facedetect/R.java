@@ -49,7 +49,8 @@ containing a value of this type.
         public static final int face_detect_surface_view=0x7f030000;
     }
     public static final class raw {
-        public static final int lbpcascade_frontalface=0x7f040000;
+        public static final int haarcascade_mcs_mouth=0x7f040000;
+        public static final int lbpcascade_frontalface=0x7f040001;
     }
     public static final class string {
         public static final int app_name=0x7f060000;
