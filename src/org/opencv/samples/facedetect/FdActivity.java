@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -25,28 +24,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class FdActivity extends Activity implements CvCameraViewListener2,
-		OnTouchListener {
+public class FdActivity extends Activity implements CvCameraViewListener2 {
 
 	private static final String TAG = "OCVSample::Activity";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(0, 255, 0, 255);
 	public static final int JAVA_DETECTOR = 0;
 	public static final int NATIVE_DETECTOR = 1;
-
-	private MenuItem mItemFace50;
-	private MenuItem mItemFace40;
-	private MenuItem mItemFace30;
-	private MenuItem mItemFace20;
 
 	private Mat mRgba;
 	private Mat mGray;
@@ -80,7 +73,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2,
 					File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
 					mCascadeFile = new File(cascadeDir, "haarcascade_mcs_mouth.xml");
 					FileOutputStream os = new FileOutputStream(mCascadeFile);
-					mOpenCvCameraView.setOnTouchListener(FdActivity.this);
 
 					byte[] buffer = new byte[4096];
 					int bytesRead;
@@ -134,7 +126,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2,
 			startActivity(player);
 			finish();
 		} else {
-			Toast.makeText(this, "Give me a sad face", Toast.LENGTH_LONG).show();
+			Toast t = Toast.makeText(this, "Give me a sad face", Toast.LENGTH_LONG);
+			t.setGravity(Gravity.TOP, 0, 0);
+			t.show();
 		}
 
 		Log.i(TAG, "called onCreate");
@@ -160,19 +154,22 @@ public class FdActivity extends Activity implements CvCameraViewListener2,
 							Highgui.imwrite(Environment.getExternalStorageDirectory()
 									.getPath() + "/moodplayer/face_sad.jpg", face);
 							mood = true;
-							Toast.makeText(FdActivity.this, "Give me a happy face",
-									Toast.LENGTH_LONG).show();
+							Toast t = Toast.makeText(FdActivity.this, "Give me a happy face",
+									Toast.LENGTH_LONG);
+							t.setGravity(Gravity.TOP, 0, 0);
+							t.show();
 							bSwitch.setText("Take happy picture");
 						} else {
 							Highgui.imwrite(Environment.getExternalStorageDirectory()
 									.getPath() + "/moodplayer/face_happy.jpg", face);
-							Toast.makeText(FdActivity.this, "Thanks", Toast.LENGTH_LONG)
-									.show();
+							Toast t = Toast.makeText(FdActivity.this, "Thanks",
+									Toast.LENGTH_LONG);
+							t.setGravity(Gravity.TOP, 0, 0);
+							t.show();
 							bSwitch.setText("Go to player");
 						}
 					}
-				}
-				else{
+				} else {
 					// TODO Auto-generated method stub
 					startActivity(player);
 					finish();
@@ -227,8 +224,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2,
 
 		mNativeDetector.detect(mGray, faces);
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-
 		Rect[] facesArray = faces.toArray();
 		if (facesArray.length != 0) {
 			Core.rectangle(mRgba, facesArray[0].tl(), facesArray[0].br(),
@@ -241,32 +236,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2,
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.i(TAG, "called onCreateOptionsMenu");
-		mItemFace50 = menu.add("Face size 50%");
-		mItemFace40 = menu.add("Face size 40%");
-		mItemFace30 = menu.add("Face size 30%");
-		mItemFace20 = menu.add("Face size 20%");
-
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
-		if (item == mItemFace50)
-			setMinFaceSize(0.5f);
-		else if (item == mItemFace40)
-			setMinFaceSize(0.4f);
-		else if (item == mItemFace30)
-			setMinFaceSize(0.3f);
-		else if (item == mItemFace20)
-			setMinFaceSize(0.2f);
 		return true;
-	}
-
-	private void setMinFaceSize(float faceSize) {
-		mRelativeFaceSize = faceSize;
-		mAbsoluteFaceSize = 0;
 	}
 
 	public boolean onTouch(View v, MotionEvent event) {

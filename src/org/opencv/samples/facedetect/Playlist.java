@@ -7,16 +7,12 @@ public class Playlist {
 
 	ArrayList<String> playlist;
 
-	public Playlist(String[] list) {
+	public Playlist(ArrayList<String> list) {
 		this.playlist = new ArrayList<String>();
-		ArrayList<String> alist = new ArrayList<String>();
 		Random r = new Random();
-		for ( String s : list){			
-			alist.add(s);		
-		}
-		while (!alist.isEmpty()) {
+		while (!list.isEmpty()) {
 
-			this.playlist.add(alist.remove(r.nextInt(alist.size())));
+			this.playlist.add(list.remove(r.nextInt(list.size())));
 
 		}
 

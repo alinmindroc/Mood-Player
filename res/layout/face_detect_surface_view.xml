@@ -8,7 +8,6 @@
         android:id="@+id/fd_activity_surface_view"
         android:layout_width="fill_parent"
         android:layout_height="600dp"
-        android:layout_above="@+id/button1"
         opencv:camera_id="front" />
 
     <Button
@@ -17,6 +16,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="Go to player" />
+        android:text="Take sad picture" />
 
 </RelativeLayout>

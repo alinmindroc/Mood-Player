@@ -15,9 +15,10 @@
   limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical" >
 
     <TextView
         android:layout_width="match_parent"
@@ -27,18 +28,30 @@
         android:text="It`s time to play your mood!"
         android:textAppearance="@android:style/TextAppearance.Small" />
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Get Video" />
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Video" />
+
+        <Button
+            android:id="@+id/photoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Photo" />
+    </LinearLayout>
 
     <SeekBar
         android:id="@+id/seekBar1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
     <TextView
-       
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.02"
@@ -46,13 +59,11 @@
         android:text="@string/mood1"
         android:textAppearance="@android:style/TextAppearance.Small" />
 
-    
-  
-
     <SeekBar
         android:id="@+id/seekBar2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -61,11 +72,11 @@
         android:text="@string/mood2"
         android:textAppearance="@android:style/TextAppearance.Small" />
 
-   
     <SeekBar
         android:id="@+id/seekBar3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -74,11 +85,9 @@
         android:text="@string/mood3"
         android:textAppearance="@android:style/TextAppearance.Small" />
 
-    
-
-  <com.google.android.youtube.player.YouTubePlayerView
-      android:id="@+id/youtube_view"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
+    <com.google.android.youtube.player.YouTubePlayerView
+        android:id="@+id/youtube_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

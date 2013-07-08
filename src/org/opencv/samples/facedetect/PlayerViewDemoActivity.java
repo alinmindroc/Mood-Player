@@ -22,12 +22,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.core.Mat;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
+import org.opencv.samples.facedetect.PhotoHandler;
 
+import android.content.pm.PackageManager;
+import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -45,14 +52,23 @@ import android.widget.Toast;
  * Note, to use a {@link YouTubePlayerView}, your activity must extend
  * {@link YouTubeBaseActivity}.
  */
-public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
+public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
+		implements CvCameraViewListener2 {
+
+	private int cameraId = 0;
+	private Camera camera;
 
 	private String htmlSource1, htmlSource2;
+	private Mat mGray;
+	private Mat mRgba;
+
 	int progress1, progress2, progress3;
+
 	private YouTubePlayer player;
 	private Button b;
-	ArrayList<String> songs;
+	private ArrayList<String> songs;
 
+	// actualizeaza playlistul de melodii
 	public void setIdArray() {
 		b.setEnabled(false);
 		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
@@ -65,8 +81,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 			URL = URL + tag + "/videos";
 
 			ServerFetchAsyncTask down1 = new ServerFetchAsyncTask(URL,
-					PlayerViewDemoActivity.this,
-					new ServerFetchAsyncTask.MyCallBack() {
+					PlayerViewDemoActivity.this, new ServerFetchAsyncTask.MyCallBack() {
 						public void run(String[] sv) {
 							htmlSource1 = sv[0];
 							htmlSource2 = sv[1];
@@ -77,37 +92,34 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 							String parts1[] = htmlSource1.split(separator);
 							// first and last 3 lines are not interesting
 							for (int i = 1; i < parts1.length - 3; i++) {
-								parts1[i] = parts1[i].substring(
-										parts1[i].indexOf("vi/"),
+								parts1[i] = parts1[i].substring(parts1[i].indexOf("vi/"),
 										parts1[i].indexOf(".jpg"));
-								parts1[i] = parts1[i].substring(3,
-										parts1[i].length() - 2);
+								parts1[i] = parts1[i].substring(3, parts1[i].length() - 2);
 							}
 
 							String parts2[] = htmlSource2.split(separator);
 							for (int i = 1; i < parts2.length - 3; i++) {
-								parts2[i] = parts2[i].substring(
-										parts2[i].indexOf("vi/"),
+								parts2[i] = parts2[i].substring(parts2[i].indexOf("vi/"),
 										parts2[i].indexOf(".jpg"));
-								parts2[i] = parts2[i].substring(3,
-										parts2[i].length() - 2);
+								parts2[i] = parts2[i].substring(3, parts2[i].length() - 2);
 							}
 
 							// final id array
 							songs = new ArrayList<String>();
-													
-							InputStream inputStream = getResources().openRawResource(getRawId(tag));
-							BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+
+							InputStream inputStream = getResources().openRawResource(
+									getRawId(tag));
+							BufferedReader br = new BufferedReader(new InputStreamReader(
+									inputStream));
 							String s;
 							try {
-								while(( s = br.readLine()) != null){
+								while ((s = br.readLine()) != null) {
 									songs.add(s);
 								}
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							
 
 							for (int i = 1; i < parts1.length - 3; i++)
 								songs.add(parts1[i]);
@@ -127,9 +139,62 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 		}
 	}
 
+	public int getRawId(String tag) {
+		if (tag.equals("happy")) {
+			return R.raw.happy;
+		}
+		if (tag.equals("happy%20hardcore")) {
+			return R.raw.happy_hardcore;
+		}
+		if (tag.equals("sad%20mood")) {
+			return R.raw.sad_mood;
+		}
+		if (tag.equals("great")) {
+			return R.raw.great;
+		}
+		if (tag.equals("bored")) {
+			return R.raw.bored;
+		}
+		return 0;
+
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+			Toast.makeText(this, "No camera on this device", Toast.LENGTH_LONG)
+					.show();
+		} else {
+			cameraId = findFrontFacingCamera();
+			if (cameraId < 0) {
+				Toast
+						.makeText(this, "No front facing camera found.", Toast.LENGTH_LONG)
+						.show();
+			} else {
+				camera = Camera.open(cameraId);
+			}
+		}
+		camera.startPreview();
+	}
+
+	private int findFrontFacingCamera() {
+		int cameraId = -1;
+		// Search for the front facing camera
+		int numberOfCameras = Camera.getNumberOfCameras();
+		for (int i = 0; i < numberOfCameras; i++) {
+			CameraInfo info = new CameraInfo();
+			Camera.getCameraInfo(i, info);
+			if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+				cameraId = i;
+				break;
+			}
+		}
+		return cameraId;
+	}
+
+	public void onResume() {
+		super.onResume();
 
 		setContentView(R.layout.playerview_demo);
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
@@ -211,6 +276,33 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 
 		});
 
+		Button bPhoto = (Button) findViewById(R.id.photoButton);
+		bPhoto.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				camera.takePicture(null, null,
+						new PhotoHandler(getApplicationContext()));
+			};
+
+		});
+
+	}
+
+	public void onCameraViewStarted(int width, int height) {
+		mGray = new Mat();
+		mRgba = new Mat();
+	}
+
+	public void onCameraViewStopped() {
+		mGray.release();
+		mRgba.release();
+	}
+
+	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+		mRgba = inputFrame.rgba();
+		return mRgba;
 	}
 
 	@Override
@@ -234,8 +326,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 					Playlist p = new Playlist(songs);
 					player.loadVideos(p.playlist);
 				} else {
-					Toast.makeText(PlayerViewDemoActivity.this,
-							"Please turn wi-fi on", Toast.LENGTH_SHORT).show();
+					Toast.makeText(PlayerViewDemoActivity.this, "Please turn wi-fi on",
+							Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -258,30 +350,18 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 			tag = new String("great");
 		return tag;
 	}
-	
-	public int getRawId (String tag){
-		if(tag.equals("happy")){
-			return R.raw.happy;
-		}
-		if(tag.equals("happy%20hardcore")){
-			return R.raw.happy_hardcore;
-		}
-		if(tag.equals("sad%20mood")){
-			return R.raw.sad_mood;
-		}
-		if(tag.equals("great")){
-			return R.raw.great;
-		}
-		if(tag.equals("bored")){
-			return R.raw.bored;
-		}
-		return 0;
-		
-	}
 
 	@Override
 	protected YouTubePlayer.Provider getYouTubePlayerProvider() {
 		return (YouTubePlayerView) findViewById(R.id.youtube_view);
 	}
 
+	@Override
+	protected void onPause() {
+		if (camera != null) {
+			camera.release();
+			camera = null;
+		}
+		super.onPause();
+	}
 }
