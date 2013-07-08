@@ -16,25 +16,25 @@
 
 package org.opencv.samples.facedetect;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Random;
 
-import org.opencv.core.MatOfRect;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
-import android.content.Context;
+
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -48,17 +48,10 @@ import android.widget.Toast;
 public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 
 	private String htmlSource1, htmlSource2;
-	private String id;// youtube video id
-
-	private int beginIndex;
-
 	int progress1, progress2, progress3;
-	private static final String KEY_CURRENTLY_SELECTED_ID = "currentlySelectedId";
-
-	private YouTubePlayerView youTubePlayerView;
 	private YouTubePlayer player;
 	private Button b;
-	private String songs[];
+	ArrayList<String> songs;
 
 	public void setIdArray() {
 		b.setEnabled(false);
@@ -67,12 +60,13 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
 		if (mWifi.isConnected()) {
-			String tag = getTag(progress1, progress2, progress3);
+			final String tag = getTag(progress1, progress2, progress3);
 			String URL = "http://www.last.fm/tag/";
 			URL = URL + tag + "/videos";
 
 			ServerFetchAsyncTask down1 = new ServerFetchAsyncTask(URL,
-					PlayerViewDemoActivity.this, new ServerFetchAsyncTask.MyCallBack() {
+					PlayerViewDemoActivity.this,
+					new ServerFetchAsyncTask.MyCallBack() {
 						public void run(String[] sv) {
 							htmlSource1 = sv[0];
 							htmlSource2 = sv[1];
@@ -83,27 +77,44 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 							String parts1[] = htmlSource1.split(separator);
 							// first and last 3 lines are not interesting
 							for (int i = 1; i < parts1.length - 3; i++) {
-								parts1[i] = parts1[i].substring(parts1[i].indexOf("vi/"),
+								parts1[i] = parts1[i].substring(
+										parts1[i].indexOf("vi/"),
 										parts1[i].indexOf(".jpg"));
-								parts1[i] = parts1[i].substring(3, parts1[i].length() - 2);
+								parts1[i] = parts1[i].substring(3,
+										parts1[i].length() - 2);
 							}
 
 							String parts2[] = htmlSource2.split(separator);
 							for (int i = 1; i < parts2.length - 3; i++) {
-								parts2[i] = parts2[i].substring(parts2[i].indexOf("vi/"),
+								parts2[i] = parts2[i].substring(
+										parts2[i].indexOf("vi/"),
 										parts2[i].indexOf(".jpg"));
-								parts2[i] = parts2[i].substring(3, parts2[i].length() - 2);
+								parts2[i] = parts2[i].substring(3,
+										parts2[i].length() - 2);
 							}
 
 							// final id array
-							songs = new String[parts1.length + parts2.length - 8];
-							int k = 0;
+							songs = new ArrayList<String>();
+													
+							InputStream inputStream = getResources().openRawResource(getRawId(tag));
+							BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+							String s;
+							try {
+								while(( s = br.readLine()) != null){
+									songs.add(s);
+								}
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
 
 							for (int i = 1; i < parts1.length - 3; i++)
-								songs[k++] = parts1[i];
+								songs.add(parts1[i]);
 							for (int i = 1; i < parts2.length - 3; i++)
-								songs[k++] = parts2[i];
-							// we use it in playvideoatselection() to get random id
+								songs.add(parts2[i]);
+							// we use it in playvideoatselection() to get random
+							// id
 							b.setEnabled(true);
 						}
 					});
@@ -223,8 +234,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 					Playlist p = new Playlist(songs);
 					player.loadVideos(p.playlist);
 				} else {
-					Toast.makeText(PlayerViewDemoActivity.this, "Please turn wi-fi on",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(PlayerViewDemoActivity.this,
+							"Please turn wi-fi on", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -246,6 +257,26 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity {
 		else
 			tag = new String("great");
 		return tag;
+	}
+	
+	public int getRawId (String tag){
+		if(tag.equals("happy")){
+			return R.raw.happy;
+		}
+		if(tag.equals("happy%20hardcore")){
+			return R.raw.happy_hardcore;
+		}
+		if(tag.equals("sad%20mood")){
+			return R.raw.sad_mood;
+		}
+		if(tag.equals("great")){
+			return R.raw.great;
+		}
+		if(tag.equals("bored")){
+			return R.raw.bored;
+		}
+		return 0;
+		
 	}
 
 	@Override
