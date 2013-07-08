@@ -133,8 +133,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2,
 		if (happyPhoto.exists() && sadPhoto.exists()) {
 			startActivity(player);
 			finish();
-		}
-		else{
+		} else {
 			Toast.makeText(this, "Give me a sad face", Toast.LENGTH_LONG).show();
 		}
 
@@ -147,15 +146,37 @@ public class FdActivity extends Activity implements CvCameraViewListener2,
 		mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
 		mOpenCvCameraView.setCvCameraViewListener(this);
 		mood = false;
-
-		Button bSwitch = (Button) findViewById(R.id.bSwitch);
+		final Button bSwitch = (Button) findViewById(R.id.bSwitch);
 		bSwitch.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				startActivity(player);
-				finish();
+				if (happyPhoto.exists() == false || sadPhoto.exists() == false) {
+					dir = new File(Environment.getExternalStorageDirectory()
+							.getAbsolutePath() + "/moodplayer");
+					dir.mkdirs();
+					if (face != null) {
+						if (mood == false) {
+							Highgui.imwrite(Environment.getExternalStorageDirectory()
+									.getPath() + "/moodplayer/face_sad.jpg", face);
+							mood = true;
+							Toast.makeText(FdActivity.this, "Give me a happy face",
+									Toast.LENGTH_LONG).show();
+							bSwitch.setText("Take happy picture");
+						} else {
+							Highgui.imwrite(Environment.getExternalStorageDirectory()
+									.getPath() + "/moodplayer/face_happy.jpg", face);
+							Toast.makeText(FdActivity.this, "Thanks", Toast.LENGTH_LONG)
+									.show();
+							bSwitch.setText("Go to player");
+						}
+					}
+				}
+				else{
+					// TODO Auto-generated method stub
+					startActivity(player);
+					finish();
+				}
 			}
 		});
 	}
@@ -249,24 +270,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2,
 	}
 
 	public boolean onTouch(View v, MotionEvent event) {
-		if (happyPhoto.exists() == false || sadPhoto.exists() == false) {
-			dir = new File(Environment.getExternalStorageDirectory()
-					.getAbsolutePath() + "/moodplayer");
-			dir.mkdirs();
-		}
-		if (face != null) {
-			if (mood == false) {
-				Highgui.imwrite(Environment.getExternalStorageDirectory().getPath()
-						+ "/moodplayer/face_sad.jpg", face);
-				mood = true;
-				Toast.makeText(this, "Give me a happy face", Toast.LENGTH_LONG).show();
-			} else {
-				Highgui.imwrite(Environment.getExternalStorageDirectory().getPath()
-						+ "/moodplayer/face_happy.jpg", face);
-				Toast.makeText(this, "Thanks", Toast.LENGTH_LONG).show();
-			}
-
-		}
 		return false;
 	}
 
