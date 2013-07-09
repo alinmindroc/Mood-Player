@@ -17,6 +17,7 @@
 package org.opencv.samples.facedetect;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,7 +25,13 @@ import java.util.ArrayList;
 
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Rect;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -38,10 +45,12 @@ import android.hardware.Camera.CameraInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -67,6 +76,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	private YouTubePlayer player;
 	private Button b;
 	private ArrayList<String> songs;
+	private Mat mSad, mHappy, face;
 
 	// actualizeaza playlistul de melodii
 	public void setIdArray() {
@@ -162,20 +172,6 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-			Toast.makeText(this, "No camera on this device", Toast.LENGTH_LONG)
-					.show();
-		} else {
-			cameraId = findFrontFacingCamera();
-			if (cameraId < 0) {
-				Toast
-						.makeText(this, "No front facing camera found.", Toast.LENGTH_LONG)
-						.show();
-			} else {
-				camera = Camera.open(cameraId);
-			}
-		}
-		camera.startPreview();
 	}
 
 	private int findFrontFacingCamera() {
@@ -195,6 +191,21 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 
 	public void onResume() {
 		super.onResume();
+
+		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+			Toast.makeText(this, "No camera on this device", Toast.LENGTH_LONG)
+					.show();
+		} else {
+			cameraId = findFrontFacingCamera();
+			if (cameraId < 0) {
+				Toast
+						.makeText(this, "No front facing camera found.", Toast.LENGTH_LONG)
+						.show();
+			} else {
+				camera = Camera.open(cameraId);
+			}
+		}
+		camera.startPreview();
 
 		setContentView(R.layout.playerview_demo);
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
@@ -284,10 +295,73 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 				// TODO Auto-generated method stub
 				camera.takePicture(null, null,
 						new PhotoHandler(getApplicationContext()));
+
 			};
 
 		});
 
+		Button bMood = (Button) findViewById(R.id.moodButton);
+		bMood.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				File root = Environment.getExternalStorageDirectory();
+				File moodFile = new File(root, "/moodplayer/mood.jpg");
+				File happyFile = new File(root, "/moodplayer/face_sad.jpg");
+				File sadFile = new File(root, "/moodplayer/face_happy.jpg");
+
+				Mat mMood = Highgui.imread(moodFile.getAbsolutePath(),
+						Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+				mHappy = Highgui.imread(happyFile.getAbsolutePath(),
+						Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+				mSad = Highgui.imread(sadFile.getAbsolutePath(),
+						Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+
+				// 10130 diferite
+				// 2998 aproape la fel
+				// 0 identice
+
+				face = null;
+				Mat mT;
+				Mat mMoodGray = Highgui.imread(moodFile.getAbsolutePath(),
+						Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+				MatOfRect faces = new MatOfRect();
+
+				mT = mMoodGray.t();
+				Core.flip(mT, mT, 0);
+
+				FdActivity.mNativeDetector.detect(mT, faces);
+				Highgui.imwrite(Environment.getExternalStorageDirectory().getPath()
+						+ "/moodplayer/mood2.jpg", mT);
+
+				Rect[] facesArray = faces.toArray();
+				if (facesArray.length != 0) {
+					face = mT.submat(facesArray[0]);
+					Toast.makeText(PlayerViewDemoActivity.this, "toast",
+							Toast.LENGTH_LONG).show();
+					TextView tvTop = (TextView) findViewById(R.id.topText);
+					tvTop.setText("happy " + Double.toString(compareProp(face, mHappy))
+							+ "sad " + Double.toString(compareProp(face, mSad)));
+
+					// Highgui.imwrite(Environment.getExternalStorageDirectory().getPath()
+					// + "/moodplayer/mood2.jpg", face);
+
+				}
+			}
+		});
+
+	}
+
+	public double compareProp(Mat m1, Mat m2) {
+		// daca au dimensiuni diferite, fa-o pe m2 de aceeasi dimensiune cu m1
+		if (m1.rows() != m2.rows() || m1.cols() != m2.cols()) {
+			Mat m3 = new Mat(m1.rows(), m1.cols(), CvType.CV_8UC1);
+			Imgproc.resize(m2, m3, m3.size());
+			return Core.norm(m1, m3);
+		} else {
+			return Core.norm(m1, m2);
+		}
 	}
 
 	public void onCameraViewStarted(int width, int height) {

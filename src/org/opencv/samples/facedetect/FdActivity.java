@@ -46,7 +46,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 	private Mat face;
 	private File mCascadeFile;
 	private File sadPhoto, happyPhoto, dir;
-	private DetectionBasedTracker mNativeDetector;
+	static public DetectionBasedTracker mNativeDetector;
 
 	private String[] mDetectorName;
 
@@ -69,9 +69,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 				try {
 					// load cascade file from application resources
 					InputStream is = getResources().openRawResource(
-							R.raw.haarcascade_mcs_mouth);
+							R.raw.lbpcascade_frontalface);
 					File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-					mCascadeFile = new File(cascadeDir, "haarcascade_mcs_mouth.xml");
+					mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
 					FileOutputStream os = new FileOutputStream(mCascadeFile);
 
 					byte[] buffer = new byte[4096];
@@ -114,6 +114,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		//FUCK YEA
+		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this,
+				mLoaderCallback);
+		
 		final Intent player = new Intent(FdActivity.this,
 				PlayerViewDemoActivity.class);
 
@@ -176,6 +180,25 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 				}
 			}
 		});
+		
+		Button bt = (Button) findViewById(R.id.button1);
+		bt.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+				File root = Environment.getExternalStorageDirectory();
+				File file = new File(root, "mood.jpg");
+				Mat m = Highgui.imread(file.getAbsolutePath());
+				if (file.exists()) {
+					Toast.makeText(FdActivity.this, Integer.toString(m.width()), Toast.LENGTH_LONG).show();
+				}
+
+			}
+		});
+		
+		
 	}
 
 	@Override

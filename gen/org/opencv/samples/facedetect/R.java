@@ -37,23 +37,102 @@ containing a value of this type.
         public static final int show_fps=0x7f010000;
     }
     public static final class drawable {
-        public static final int icon=0x7f020000;
+        public static final int bored=0x7f020000;
+        public static final int excited=0x7f020001;
+        public static final int happy=0x7f020002;
+        public static final int icon=0x7f020003;
+        public static final int icon2=0x7f020004;
+        public static final int layout=0x7f020005;
+        public static final int mad=0x7f020006;
+        public static final int sad=0x7f020007;
+        public static final int wink=0x7f020008;
     }
     public static final class id {
         public static final int any=0x7f050000;
+        public static final int bSwitch=0x7f050005;
         public static final int back=0x7f050001;
-        public static final int fd_activity_surface_view=0x7f050003;
+        public static final int button1=0x7f050006;
+        public static final int fd_activity_surface_view=0x7f050004;
         public static final int front=0x7f050002;
+        public static final int moodButton=0x7f050009;
+        public static final int photoButton=0x7f050008;
+        public static final int player_view=0x7f050003;
+        public static final int seekBar1=0x7f05000a;
+        public static final int seekBar2=0x7f05000b;
+        public static final int seekBar3=0x7f05000c;
+        public static final int topText=0x7f050007;
+        public static final int youtube_view=0x7f05000d;
     }
     public static final class layout {
         public static final int face_detect_surface_view=0x7f030000;
+        public static final int playerview_demo=0x7f030001;
     }
     public static final class raw {
-        public static final int haarcascade_mcs_mouth=0x7f040000;
-        public static final int lbpcascade_frontalface=0x7f040001;
+        public static final int bored=0x7f040000;
+        public static final int great=0x7f040001;
+        public static final int haarcascade_frontalface_alt_tree=0x7f040002;
+        public static final int haarcascade_mcs_eyepair_big=0x7f040003;
+        public static final int haarcascade_mcs_eyepair_small=0x7f040004;
+        public static final int haarcascade_mcs_mouth=0x7f040005;
+        public static final int haarcascade_mcs_upperbody=0x7f040006;
+        public static final int haarcascade_smile=0x7f040007;
+        public static final int happy=0x7f040008;
+        public static final int happy_hardcore=0x7f040009;
+        public static final int lbpcascade_frontalface=0x7f04000a;
+        public static final int sad_mood=0x7f04000b;
     }
     public static final class string {
-        public static final int app_name=0x7f060000;
+        public static final int action_bar_demo_name=0x7f06000a;
+        public static final int actionbar_tutorial=0x7f060024;
+        public static final int app_name=0x7f060003;
+        public static final int autoplay=0x7f06001c;
+        public static final int chromeless=0x7f060017;
+        public static final int def=0x7f060015;
+        public static final int demo_select=0x7f06000f;
+        public static final int enter_fullscreen=0x7f060022;
+        public static final int error_player=0x7f060026;
+        public static final int error_thumbnail_view=0x7f060025;
+        public static final int fragment_demo_name=0x7f060008;
+        public static final int fullscreen_demo_name=0x7f06000b;
+        public static final int fullscreen_tutorial=0x7f060021;
+        public static final int intent_disabled=0x7f06001f;
+        public static final int intent_select=0x7f06001e;
+        public static final int intents_demo_name=0x7f06000c;
+        public static final int isLaunchableActivity=0x7f060001;
+        public static final int landscape_fullscreen=0x7f060023;
+        public static final int lightbox_mode=0x7f06001d;
+        public static final int loggingTag=0x7f060002;
+        public static final int minVersion=0x7f060000;
+        public static final int minimal=0x7f060016;
+        public static final int mood1=0x7f060028;
+        public static final int mood2=0x7f060029;
+        public static final int mood3=0x7f060027;
+        public static final int pause=0x7f060011;
+        public static final int play=0x7f060010;
+        public static final int play_playlist=0x7f060019;
+        public static final int play_video=0x7f060018;
+        public static final int player_controls_demo_name=0x7f060009;
+        public static final int player_style=0x7f060014;
+        public static final int playerfragment_text=0x7f06000e;
+        public static final int playerview_demo_name=0x7f060007;
+        public static final int playerview_text=0x7f06000d;
+        public static final int seconds=0x7f060013;
+        public static final int skip_to=0x7f060012;
+        public static final int standalone_player_demo_name=0x7f060006;
+        public static final int start_index=0x7f06001a;
+        public static final int start_time=0x7f06001b;
+        public static final int videowall_demo_name=0x7f060005;
+        public static final int youtube_api_demo=0x7f060004;
+        public static final int youtube_not_installed=0x7f060020;
+    }
+    public static final class style {
+        /**  API 11 theme customizations can go here. 
+ API 11 theme customizations can go here. 
+         */
+        public static final int AppBaseTheme=0x7f070002;
+        public static final int BlackNoBarsTheme=0x7f070000;
+        public static final int BlackNoTitleBarTheme=0x7f070001;
+        public static final int OverlayActionBarTheme=0x7f070003;
     }
     public static final class styleable {
         /** Attributes that can be used with a CameraBridgeViewBase.

@@ -21,6 +21,7 @@
     android:orientation="vertical" >
 
     <TextView
+        android:id="@+id/topText"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.02"
@@ -44,6 +45,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Get Photo" />
+
+        <Button
+            android:id="@+id/moodButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Mood" />
+
     </LinearLayout>
 
     <SeekBar
