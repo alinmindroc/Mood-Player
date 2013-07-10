@@ -76,7 +76,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	private Mat mRgba;
 	private long detectionThreshold = 5000;
 
-	int progress1;
+	private int progress1;
+	private String currentMood = "happy";
 
 	private YouTubePlayer player;
 	private Button b;
@@ -97,12 +98,13 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
 		if (mWifi.isConnected()) {
-			final String tag = getTag(progress1);
+			final String tag = getTag();
 			String URL = "http://www.last.fm/tag/";
 			URL = URL + tag + "/videos";
 
 			ServerFetchAsyncTask down1 = new ServerFetchAsyncTask(URL,
-					PlayerViewDemoActivity.this, new ServerFetchAsyncTask.MyCallBack() {
+					PlayerViewDemoActivity.this,
+					new ServerFetchAsyncTask.MyCallBack() {
 						public void run(String[] sv) {
 							htmlSource1 = sv[0];
 							htmlSource2 = sv[1];
@@ -113,25 +115,29 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 							String parts1[] = htmlSource1.split(separator);
 							// first and last 3 lines are not interesting
 							for (int i = 1; i < parts1.length - 3; i++) {
-								parts1[i] = parts1[i].substring(parts1[i].indexOf("vi/"),
+								parts1[i] = parts1[i].substring(
+										parts1[i].indexOf("vi/"),
 										parts1[i].indexOf(".jpg"));
-								parts1[i] = parts1[i].substring(3, parts1[i].length() - 2);
+								parts1[i] = parts1[i].substring(3,
+										parts1[i].length() - 2);
 							}
 
 							String parts2[] = htmlSource2.split(separator);
 							for (int i = 1; i < parts2.length - 3; i++) {
-								parts2[i] = parts2[i].substring(parts2[i].indexOf("vi/"),
+								parts2[i] = parts2[i].substring(
+										parts2[i].indexOf("vi/"),
 										parts2[i].indexOf(".jpg"));
-								parts2[i] = parts2[i].substring(3, parts2[i].length() - 2);
+								parts2[i] = parts2[i].substring(3,
+										parts2[i].length() - 2);
 							}
 
 							// final id array
 							songs = new ArrayList<String>();
 
-							InputStream inputStream = getResources().openRawResource(
-									getRawId(tag));
-							BufferedReader br = new BufferedReader(new InputStreamReader(
-									inputStream));
+							InputStream inputStream = getResources()
+									.openRawResource(getRawId(tag));
+							BufferedReader br = new BufferedReader(
+									new InputStreamReader(inputStream));
 							String s;
 							try {
 								while ((s = br.readLine()) != null) {
@@ -151,8 +157,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 							b.setEnabled(true);
 						}
 					});
-			Toast.makeText(PlayerViewDemoActivity.this, "Downloading id list...",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(PlayerViewDemoActivity.this,
+					"Downloading id list...", Toast.LENGTH_SHORT).show();
 			down1.execute();
 		} else {
 			Toast.makeText(PlayerViewDemoActivity.this, "Please turn wi-fi on",
@@ -170,12 +176,10 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		if (tag.equals("sad%20mood")) {
 			return R.raw.sad_mood;
 		}
-		if (tag.equals("great")) {
-			return R.raw.great;
+		if (tag.equals("sad")) {
+			return R.raw.sad;
 		}
-		if (tag.equals("bored")) {
-			return R.raw.bored;
-		}
+		
 		return 0;
 
 	}
@@ -210,15 +214,15 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	public void onResume() {
 		super.onResume();
 
-		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+		if (!getPackageManager()
+				.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
 			Toast.makeText(this, "No camera on this device", Toast.LENGTH_LONG)
 					.show();
 		} else {
 			cameraId = findFrontFacingCamera();
 			if (cameraId < 0) {
-				Toast
-						.makeText(this, "No front facing camera found.", Toast.LENGTH_LONG)
-						.show();
+				Toast.makeText(this, "No front facing camera found.",
+						Toast.LENGTH_LONG).show();
 			} else {
 				camera = Camera.open(cameraId);
 			}
@@ -312,19 +316,31 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 					Playlist p = new Playlist(songs);
 					player.loadVideos(p.playlist);
 				} else {
-					Toast.makeText(PlayerViewDemoActivity.this, "Please turn wi-fi on",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(PlayerViewDemoActivity.this,
+							"Please turn wi-fi on", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
 
 	}
 
-	public String getTag(int progress1) {
-		if (progress1 < 50)
-			return "happy";
-		else
-			return "sad";
+	public String getTag() {
+
+		if (currentMood.equals("happy")) {
+			if (progress1 < 50) {
+				return "happy";
+			} else {
+				return "happy%20hardcore";
+			}
+		} else {
+			if (progress1 < 50) {
+				return "sad%20mood";
+			} else {
+				return "sad";
+			}
+
+		}
+
 	}
 
 	@Override
@@ -353,8 +369,9 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			File sadPhoto = new File(Environment.getExternalStorageDirectory()
 					.getAbsolutePath() + "/moodplayer/face_sad.jpg");
 
-			File happyPhoto = new File(Environment.getExternalStorageDirectory()
-					.getAbsolutePath() + "/moodplayer/face_happy.jpg");
+			File happyPhoto = new File(Environment
+					.getExternalStorageDirectory().getAbsolutePath()
+					+ "/moodplayer/face_happy.jpg");
 
 			sadPhoto.delete();
 			happyPhoto.delete();
@@ -377,7 +394,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		if (camera != null) {
 			camera.startPreview();
 
-			camera.takePicture(null, null, new PhotoHandler(getApplicationContext()));
+			camera.takePicture(null, null, new PhotoHandler(
+					getApplicationContext()));
 
 			mHappy = Highgui.imread(happyFile.getAbsolutePath(),
 					Highgui.CV_LOAD_IMAGE_GRAYSCALE);
@@ -396,7 +414,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			mT = mMoodGray.t();
 			Core.flip(mT, mT, 0);
 
-			Rect halfRect = new Rect(0, mT.rows() / 2, mT.cols(), mT.rows() / 2 - 10);
+			Rect halfRect = new Rect(0, mT.rows() / 2, mT.cols(),
+					mT.rows() / 2 - 10);
 			mT = mT.submat(halfRect);
 
 			tvTop = (TextView) findViewById(R.id.topText);
@@ -409,6 +428,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			detect = new FaceDetectAsyncTask(m, PlayerViewDemoActivity.this,
 					new FaceDetectAsyncTask.MyCallBack() {
 						public void run(String mood) {
+							currentMood = new String(mood);
 							tvTop.setText("You seem " + mood);
 						}
 					});
