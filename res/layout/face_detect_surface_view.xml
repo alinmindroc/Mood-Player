@@ -8,6 +8,7 @@
         android:id="@+id/fd_activity_surface_view"
         android:layout_width="fill_parent"
         android:layout_height="600dp"
+        android:layout_alignParentTop="true"
         opencv:camera_id="front" />
 
     <Button
@@ -18,12 +19,15 @@
         android:layout_centerHorizontal="true"
         android:text="Take sad picture" />
 
-    <Button
-        android:id="@+id/button1"
+    <TextView
+        android:id="@+id/topTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/bSwitch"
-        android:layout_centerHorizontal="true"
-        android:text="Button" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="#000"
+        android:gravity="center"
+        android:text="Please wait for the red rectangle, then make a sad face" />
 
 </RelativeLayout>

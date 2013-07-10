@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -32,12 +31,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
 
 	private static final String TAG = "OCVSample::Activity";
-	private static final Scalar FACE_RECT_COLOR = new Scalar(0, 255, 0, 255);
+	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 0, 0, 255);
 	public static final int JAVA_DETECTOR = 0;
 	public static final int NATIVE_DETECTOR = 1;
 
@@ -48,11 +47,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 	private File sadPhoto, happyPhoto, dir;
 	static public DetectionBasedTracker mNativeDetector;
 
-	private String[] mDetectorName;
-
 	private float mRelativeFaceSize = 0.2f;
 	private int mAbsoluteFaceSize = 0;
-	private boolean mood;
+	private boolean mood, bDetect;
+	private Intent player;
 
 	private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -69,9 +67,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 				try {
 					// load cascade file from application resources
 					InputStream is = getResources().openRawResource(
-							R.raw.lbpcascade_frontalface);
+							R.raw.haarcascade_mcs_mouth);
 					File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-					mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
+					mCascadeFile = new File(cascadeDir, "haarcascade_mcs_mouth.xml");
 					FileOutputStream os = new FileOutputStream(mCascadeFile);
 
 					byte[] buffer = new byte[4096];
@@ -103,37 +101,13 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 		}
 	};
 
-	public FdActivity() {
-		mDetectorName = new String[2];
-		mDetectorName[JAVA_DETECTOR] = "Java";
-		mDetectorName[NATIVE_DETECTOR] = "Native (tracking)";
-
-		Log.i(TAG, "Instantiated new " + this.getClass());
-	}
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		//FUCK YEA
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this,
 				mLoaderCallback);
-		
-		final Intent player = new Intent(FdActivity.this,
-				PlayerViewDemoActivity.class);
 
-		happyPhoto = new File(Environment.getExternalStorageDirectory()
-				.getAbsolutePath() + "/moodplayer/face_happy.jpg");
-		sadPhoto = new File(Environment.getExternalStorageDirectory()
-				.getAbsolutePath() + "/moodplayer/face_sad.jpg");
-
-		if (happyPhoto.exists() && sadPhoto.exists()) {
-			startActivity(player);
-			finish();
-		} else {
-			Toast t = Toast.makeText(this, "Give me a sad face", Toast.LENGTH_LONG);
-			t.setGravity(Gravity.TOP, 0, 0);
-			t.show();
-		}
+		player = new Intent(FdActivity.this, PlayerViewDemoActivity.class);
 
 		Log.i(TAG, "called onCreate");
 		super.onCreate(savedInstanceState);
@@ -155,22 +129,21 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 					dir.mkdirs();
 					if (face != null) {
 						if (mood == false) {
+							// incadreaza gura
 							Highgui.imwrite(Environment.getExternalStorageDirectory()
 									.getPath() + "/moodplayer/face_sad.jpg", face);
 							mood = true;
-							Toast t = Toast.makeText(FdActivity.this, "Give me a happy face",
-									Toast.LENGTH_LONG);
-							t.setGravity(Gravity.TOP, 0, 0);
-							t.show();
+							TextView tvTop = (TextView) findViewById(R.id.topTextView);
+							tvTop.setText("Now please make a happy face");
 							bSwitch.setText("Take happy picture");
 						} else {
+							// incadreaza gura
 							Highgui.imwrite(Environment.getExternalStorageDirectory()
 									.getPath() + "/moodplayer/face_happy.jpg", face);
-							Toast t = Toast.makeText(FdActivity.this, "Thanks",
-									Toast.LENGTH_LONG);
-							t.setGravity(Gravity.TOP, 0, 0);
-							t.show();
+							TextView tvTop = (TextView) findViewById(R.id.topTextView);
+							tvTop.setText("Thanks, enjoy your music!");
 							bSwitch.setText("Go to player");
+							bDetect = false;
 						}
 					}
 				} else {
@@ -180,25 +153,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 				}
 			}
 		});
-		
-		Button bt = (Button) findViewById(R.id.button1);
-		bt.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
 
-				File root = Environment.getExternalStorageDirectory();
-				File file = new File(root, "mood.jpg");
-				Mat m = Highgui.imread(file.getAbsolutePath());
-				if (file.exists()) {
-					Toast.makeText(FdActivity.this, Integer.toString(m.width()), Toast.LENGTH_LONG).show();
-				}
-
-			}
-		});
-		
-		
 	}
 
 	@Override
@@ -211,8 +166,19 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 	@Override
 	public void onResume() {
 		super.onResume();
+		bDetect = true;
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this,
 				mLoaderCallback);
+
+		happyPhoto = new File(Environment.getExternalStorageDirectory()
+				.getAbsolutePath() + "/moodplayer/face_happy.jpg");
+		sadPhoto = new File(Environment.getExternalStorageDirectory()
+				.getAbsolutePath() + "/moodplayer/face_sad.jpg");
+
+		if (happyPhoto.exists() && sadPhoto.exists()) {
+			startActivity(player);
+			finish();
+		}
 	}
 
 	public void onDestroy() {
@@ -235,23 +201,25 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 		mRgba = inputFrame.rgba();
 		mGray = inputFrame.gray();
 
-		if (mAbsoluteFaceSize == 0) {
-			int height = mGray.rows();
-			if (Math.round(height * mRelativeFaceSize) > 0) {
-				mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
+		if (bDetect == true) {
+			if (mAbsoluteFaceSize == 0) {
+				int height = mGray.rows();
+				if (Math.round(height * mRelativeFaceSize) > 0) {
+					mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
+				}
+				mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
 			}
-			mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
-		}
 
-		MatOfRect faces = new MatOfRect();
+			MatOfRect faces = new MatOfRect();
 
-		mNativeDetector.detect(mGray, faces);
+			mNativeDetector.detect(mGray, faces);
 
-		Rect[] facesArray = faces.toArray();
-		if (facesArray.length != 0) {
-			Core.rectangle(mRgba, facesArray[0].tl(), facesArray[0].br(),
-					FACE_RECT_COLOR, 3);
-			face = mRgba.submat(facesArray[0]);
+			Rect[] facesArray = faces.toArray();
+			if (facesArray.length != 0) {
+				Core.rectangle(mRgba, facesArray[0].tl(), facesArray[0].br(),
+						FACE_RECT_COLOR, 3);
+				face = mRgba.submat(facesArray[0]);
+			}
 		}
 
 		return mRgba;
