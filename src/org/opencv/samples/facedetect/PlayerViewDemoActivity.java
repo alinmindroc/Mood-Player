@@ -23,20 +23,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import javax.security.auth.callback.Callback;
-
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.net.ConnectivityManager;
@@ -49,6 +47,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,42 +59,37 @@ import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
-/**
- * A simple YouTube Android API demo application which shows how to create a
- * simple application that displays a YouTube Video in a
- * {@link YouTubePlayerView}.
- * <p>
- * Note, to use a {@link YouTubePlayerView}, your activity must extend
- * {@link YouTubeBaseActivity}.
- */
 public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		implements CvCameraViewListener2 {
 
 	private int cameraId = 0;
+	private int progress1;
+
 	private Camera camera;
 
 	private String htmlSource1, htmlSource2;
-	private Mat mGray;
-	private Mat mRgba;
-	private long detectionThreshold = 5000;
-
-	private int progress1;
 	private String currentMood = "happy";
 
+	private Mat mGray;
+	private Mat mRgba;
+
 	private YouTubePlayer player;
-	private Button b;
 	private ArrayList<String> songs;
-	private Mat mSad, mHappy, face, mMoodGray;
+	private Mat mSad, mHappy, mMoodGray;
 	private MenuItem mDeleteTrainingSet, mExit;
-	private MatOfRect faces;
-	private Rect[] facesArray;
 	private File root, moodFile, happyFile, sadFile;
 	private TextView tvTop;
 	private FaceDetectAsyncTask detect;
+	boolean faceDetection;
+	private Button playListButton;
+	private ImageView sadImage, happyImage;
+	final Drawable gauges[] = new Drawable[16];
 
-	// actualizeaza playlistul de melodii
+	// update playlist
 	public void setIdArray() {
-		b.setEnabled(false);
+		// set the button unclickable while the playlist is downloaded
+		playListButton.setEnabled(false);
+
 		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 		NetworkInfo mWifi = connManager
 				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -103,8 +100,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			URL = URL + tag + "/videos";
 
 			ServerFetchAsyncTask down1 = new ServerFetchAsyncTask(URL,
-					PlayerViewDemoActivity.this,
-					new ServerFetchAsyncTask.MyCallBack() {
+					PlayerViewDemoActivity.this, new ServerFetchAsyncTask.MyCallBack() {
 						public void run(String[] sv) {
 							htmlSource1 = sv[0];
 							htmlSource2 = sv[1];
@@ -115,36 +111,31 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 							String parts1[] = htmlSource1.split(separator);
 							// first and last 3 lines are not interesting
 							for (int i = 1; i < parts1.length - 3; i++) {
-								parts1[i] = parts1[i].substring(
-										parts1[i].indexOf("vi/"),
+								parts1[i] = parts1[i].substring(parts1[i].indexOf("vi/"),
 										parts1[i].indexOf(".jpg"));
-								parts1[i] = parts1[i].substring(3,
-										parts1[i].length() - 2);
+								parts1[i] = parts1[i].substring(3, parts1[i].length() - 2);
 							}
 
 							String parts2[] = htmlSource2.split(separator);
 							for (int i = 1; i < parts2.length - 3; i++) {
-								parts2[i] = parts2[i].substring(
-										parts2[i].indexOf("vi/"),
+								parts2[i] = parts2[i].substring(parts2[i].indexOf("vi/"),
 										parts2[i].indexOf(".jpg"));
-								parts2[i] = parts2[i].substring(3,
-										parts2[i].length() - 2);
+								parts2[i] = parts2[i].substring(3, parts2[i].length() - 2);
 							}
 
 							// final id array
 							songs = new ArrayList<String>();
 
-							InputStream inputStream = getResources()
-									.openRawResource(getRawId(tag));
-							BufferedReader br = new BufferedReader(
-									new InputStreamReader(inputStream));
+							InputStream inputStream = getResources().openRawResource(
+									getRawId(tag));
+							BufferedReader br = new BufferedReader(new InputStreamReader(
+									inputStream));
 							String s;
 							try {
 								while ((s = br.readLine()) != null) {
 									songs.add(s);
 								}
 							} catch (IOException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 
@@ -154,11 +145,11 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 								songs.add(parts2[i]);
 							// we use it in playvideoatselection() to get random
 							// id
-							b.setEnabled(true);
+							playListButton.setEnabled(true);
 						}
 					});
-			Toast.makeText(PlayerViewDemoActivity.this,
-					"Downloading id list...", Toast.LENGTH_SHORT).show();
+			Toast.makeText(PlayerViewDemoActivity.this, "Downloading id list...",
+					Toast.LENGTH_SHORT).show();
 			down1.execute();
 		} else {
 			Toast.makeText(PlayerViewDemoActivity.this, "Please turn wi-fi on",
@@ -179,21 +170,36 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		if (tag.equals("sad")) {
 			return R.raw.sad;
 		}
-		
 		return 0;
-
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		faces = new MatOfRect();
+		faceDetection = false;
 		root = Environment.getExternalStorageDirectory();
 
 		moodFile = new File(root, "/moodplayer/mood.jpg");
 		happyFile = new File(root, "/moodplayer/face_happy.jpg");
 		sadFile = new File(root, "/moodplayer/face_sad.jpg");
+
+		gauges[0] = getResources().getDrawable(R.drawable.gauge1);
+		gauges[1] = getResources().getDrawable(R.drawable.gauge2);
+		gauges[2] = getResources().getDrawable(R.drawable.gauge3);
+		gauges[3] = getResources().getDrawable(R.drawable.gauge4);
+		gauges[4] = getResources().getDrawable(R.drawable.gauge5);
+		gauges[5] = getResources().getDrawable(R.drawable.gauge6);
+		gauges[6] = getResources().getDrawable(R.drawable.gauge7);
+		gauges[7] = getResources().getDrawable(R.drawable.gauge8);
+		gauges[8] = getResources().getDrawable(R.drawable.gauge9);
+		gauges[9] = getResources().getDrawable(R.drawable.gauge10);
+		gauges[10] = getResources().getDrawable(R.drawable.gauge11);
+		gauges[11] = getResources().getDrawable(R.drawable.gauge12);
+		gauges[12] = getResources().getDrawable(R.drawable.gauge13);
+		gauges[13] = getResources().getDrawable(R.drawable.gauge14);
+		gauges[14] = getResources().getDrawable(R.drawable.gauge15);
+		gauges[15] = getResources().getDrawable(R.drawable.gauge16);
 	}
 
 	private int findFrontFacingCamera() {
@@ -214,15 +220,15 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	public void onResume() {
 		super.onResume();
 
-		if (!getPackageManager()
-				.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
 			Toast.makeText(this, "No camera on this device", Toast.LENGTH_LONG)
 					.show();
 		} else {
 			cameraId = findFrontFacingCamera();
 			if (cameraId < 0) {
-				Toast.makeText(this, "No front facing camera found.",
-						Toast.LENGTH_LONG).show();
+				Toast
+						.makeText(this, "No front facing camera found.", Toast.LENGTH_LONG)
+						.show();
 			} else {
 				camera = Camera.open(cameraId);
 			}
@@ -233,30 +239,101 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
-		b = (Button) findViewById(R.id.button1);
+		playListButton = (Button) findViewById(R.id.button1);
 		SeekBar seekBar1 = (SeekBar) findViewById(R.id.seekBar1);
 
-		// get seekbar values
 		seekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
-				// TODO Auto-generated method stub
 				// seekBarValue.setText(String.valueOf(progress));
 				progress1 = progress;
+				ImageView gauge = (ImageView) findViewById(R.id.gaugeImage);
+
+				if (progress <= 6)
+					gauge.setImageDrawable(gauges[0]);
+				else if (progress > 6 && progress <= 13)
+					gauge.setImageDrawable(gauges[1]);
+				else if (progress > 13 && progress <= 19)
+					gauge.setImageDrawable(gauges[2]);
+				else if (progress > 19 && progress <= 25)
+					gauge.setImageDrawable(gauges[3]);
+				else if (progress > 25 && progress <= 31)
+					gauge.setImageDrawable(gauges[4]);
+				else if (progress > 31 && progress <= 37)
+					gauge.setImageDrawable(gauges[5]);
+				else if (progress > 37 && progress <= 43)
+					gauge.setImageDrawable(gauges[6]);
+				else if (progress > 43 && progress <= 49)
+					gauge.setImageDrawable(gauges[7]);
+				else if (progress < 49 && progress <= 55)
+					gauge.setImageDrawable(gauges[8]);
+				else if (progress > 55 && progress <= 61)
+					gauge.setImageDrawable(gauges[9]);
+				else if (progress > 61 && progress <= 67)
+					gauge.setImageDrawable(gauges[10]);
+				else if (progress > 67 && progress <= 73)
+					gauge.setImageDrawable(gauges[11]);
+				else if (progress > 73 && progress <= 79)
+					gauge.setImageDrawable(gauges[12]);
+				else if (progress > 79 && progress <= 85)
+					gauge.setImageDrawable(gauges[13]);
+				else if (progress > 85 && progress <= 91)
+					gauge.setImageDrawable(gauges[14]);
+				else if (progress > 91)
+					gauge.setImageDrawable(gauges[15]);
 			}
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
 				setIdArray();
 
+			}
+		});
+
+		CheckBox checkFd = (CheckBox) findViewById(R.id.checkBox1);
+		checkFd.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked)
+					faceDetection = true;
+				else
+					faceDetection = false;
+			}
+		});
+
+		happyImage = (ImageView) findViewById(R.id.hapyFace);
+		happyImage.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (faceDetection == false) {
+					sadImage.setImageDrawable(getResources().getDrawable(
+							R.drawable.sad_bw));
+					happyImage.setImageDrawable(getResources().getDrawable(
+							R.drawable.happy));
+					happyImage.bringToFront();
+				}
+			}
+		});
+
+		sadImage = (ImageView) findViewById(R.id.sadFace);
+		sadImage.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (faceDetection == false) {
+					sadImage.setImageDrawable(getResources().getDrawable(R.drawable.sad));
+					happyImage.setImageDrawable(getResources().getDrawable(
+							R.drawable.happy_bw));
+					sadImage.bringToFront();
+				}
 			}
 		});
 
@@ -307,7 +384,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	}
 
 	private void playVideoAtSelection() {
-		b.setOnClickListener(new OnClickListener() {
+		playListButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -316,8 +393,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 					Playlist p = new Playlist(songs);
 					player.loadVideos(p.playlist);
 				} else {
-					Toast.makeText(PlayerViewDemoActivity.this,
-							"Please turn wi-fi on", Toast.LENGTH_SHORT).show();
+					Toast.makeText(PlayerViewDemoActivity.this, "Please turn wi-fi on",
+							Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -369,9 +446,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			File sadPhoto = new File(Environment.getExternalStorageDirectory()
 					.getAbsolutePath() + "/moodplayer/face_sad.jpg");
 
-			File happyPhoto = new File(Environment
-					.getExternalStorageDirectory().getAbsolutePath()
-					+ "/moodplayer/face_happy.jpg");
+			File happyPhoto = new File(Environment.getExternalStorageDirectory()
+					.getAbsolutePath() + "/moodplayer/face_happy.jpg");
 
 			sadPhoto.delete();
 			happyPhoto.delete();
@@ -392,11 +468,10 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	public void runDetection() {
 
 		if (camera != null) {
-			camera.startPreview();
 
-			camera.takePicture(null, null, new PhotoHandler(
-					getApplicationContext()));
-
+			TakePhotoAsyncTask getPhoto = new TakePhotoAsyncTask(camera, PlayerViewDemoActivity.this);
+			getPhoto.execute();
+			
 			mHappy = Highgui.imread(happyFile.getAbsolutePath(),
 					Highgui.CV_LOAD_IMAGE_GRAYSCALE);
 			mSad = Highgui.imread(sadFile.getAbsolutePath(),
@@ -408,14 +483,12 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			mMoodGray = Highgui.imread(moodFile.getAbsolutePath(),
 					Highgui.CV_LOAD_IMAGE_GRAYSCALE);
 
-			face = null;
 			Mat mT;
 
 			mT = mMoodGray.t();
 			Core.flip(mT, mT, 0);
 
-			Rect halfRect = new Rect(0, mT.rows() / 2, mT.cols(),
-					mT.rows() / 2 - 10);
+			Rect halfRect = new Rect(0, mT.rows() / 2, mT.cols(), mT.rows() / 2 - 10);
 			mT = mT.submat(halfRect);
 
 			tvTop = (TextView) findViewById(R.id.topText);
@@ -430,6 +503,21 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 						public void run(String mood) {
 							currentMood = new String(mood);
 							tvTop.setText("You seem " + mood);
+							happyImage = (ImageView) findViewById(R.id.hapyFace);
+							sadImage = (ImageView) findViewById(R.id.sadFace);
+							if (mood.equals("sad")) {
+								sadImage.setImageDrawable(getResources().getDrawable(
+										R.drawable.sad));
+								happyImage.setImageDrawable(getResources().getDrawable(
+										R.drawable.happy_bw));
+								sadImage.bringToFront();
+							} else {
+								sadImage.setImageDrawable(getResources().getDrawable(
+										R.drawable.sad_bw));
+								happyImage.setImageDrawable(getResources().getDrawable(
+										R.drawable.happy));
+								happyImage.bringToFront();
+							}
 						}
 					});
 
@@ -443,7 +531,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		final Handler handler = new Handler();
 		handler.postDelayed(new Runnable() {
 			public void run() {
-				runDetection();
+				if (faceDetection == true)
+					runDetection();
 				handler.postDelayed(this, 15000);
 			}
 		}, 10000);

@@ -51,6 +51,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 	private int mAbsoluteFaceSize = 0;
 	private boolean mood, bDetect;
 	private Intent player;
+	private MenuItem mExit;
 
 	private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -147,7 +148,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 						}
 					}
 				} else {
-					// TODO Auto-generated method stub
 					startActivity(player);
 					finish();
 				}
@@ -225,13 +225,15 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 		return mRgba;
 	}
 
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		mExit = menu.add("Quit application");
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item == mExit)
+			finish();
 		return true;
 	}
 

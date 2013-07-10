@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">OCV Face Detection</string>
+    <string name="app_name">Mood Based Player</string>
      <string name="youtube_api_demo">Mood Player</string>
 
     <string name="videowall_demo_name">Video Wall</string>

@@ -72,7 +72,7 @@ public class FaceDetectAsyncTask extends AsyncTask<Mat[], Void, String> {
 
 	public double compareProp(Mat m1, Mat m2) {
 		// daca au dimensiuni diferite, fa-o pe m2 de aceeasi dimensiune cu m1
-		if(m1 == null || m2 == null)
+		if (m1 == null || m2 == null)
 			return -1;
 		if (m1.rows() != m2.rows() || m1.cols() != m2.cols()) {
 			Mat m3 = new Mat(m1.rows(), m1.cols(), CvType.CV_8UC1);
@@ -85,11 +85,6 @@ public class FaceDetectAsyncTask extends AsyncTask<Mat[], Void, String> {
 
 	protected void onPostExecute(String str) {
 		callBack.run(str);
-		/*
-		 * TextView lala = (TextView) this.mContext.findViewById(R.id.source);
-		 * lala.setMovementMethod(new ScrollingMovementMethod());
-		 * lala.setText(this.str);
-		 */
 	}
 
 	public static class MyCallBack {
