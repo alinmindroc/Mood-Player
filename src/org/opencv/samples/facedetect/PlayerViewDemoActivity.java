@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
@@ -46,6 +48,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -91,7 +95,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			URL = URL + tag + "/videos";
 
 			ServerFetchAsyncTask down1 = new ServerFetchAsyncTask(URL,
-					PlayerViewDemoActivity.this, new ServerFetchAsyncTask.MyCallBack() {
+					PlayerViewDemoActivity.this,
+					new ServerFetchAsyncTask.MyCallBack() {
 						public void run(String[] sv) {
 							htmlSource1 = sv[0];
 							htmlSource2 = sv[1];
@@ -102,25 +107,29 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 							String parts1[] = htmlSource1.split(separator);
 							// first and last 3 lines are not interesting
 							for (int i = 1; i < parts1.length - 3; i++) {
-								parts1[i] = parts1[i].substring(parts1[i].indexOf("vi/"),
+								parts1[i] = parts1[i].substring(
+										parts1[i].indexOf("vi/"),
 										parts1[i].indexOf(".jpg"));
-								parts1[i] = parts1[i].substring(3, parts1[i].length() - 2);
+								parts1[i] = parts1[i].substring(3,
+										parts1[i].length() - 2);
 							}
 
 							String parts2[] = htmlSource2.split(separator);
 							for (int i = 1; i < parts2.length - 3; i++) {
-								parts2[i] = parts2[i].substring(parts2[i].indexOf("vi/"),
+								parts2[i] = parts2[i].substring(
+										parts2[i].indexOf("vi/"),
 										parts2[i].indexOf(".jpg"));
-								parts2[i] = parts2[i].substring(3, parts2[i].length() - 2);
+								parts2[i] = parts2[i].substring(3,
+										parts2[i].length() - 2);
 							}
 
 							// final id array
 							songs = new ArrayList<String>();
 
-							InputStream inputStream = getResources().openRawResource(
-									getRawId(tag));
-							BufferedReader br = new BufferedReader(new InputStreamReader(
-									inputStream));
+							InputStream inputStream = getResources()
+									.openRawResource(getRawId(tag));
+							BufferedReader br = new BufferedReader(
+									new InputStreamReader(inputStream));
 							String s;
 							try {
 								while ((s = br.readLine()) != null) {
@@ -172,6 +181,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		// timerAlert();
 	}
 
 	private int findFrontFacingCamera() {
@@ -192,15 +202,15 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	public void onResume() {
 		super.onResume();
 
-		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+		if (!getPackageManager()
+				.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
 			Toast.makeText(this, "No camera on this device", Toast.LENGTH_LONG)
 					.show();
 		} else {
 			cameraId = findFrontFacingCamera();
 			if (cameraId < 0) {
-				Toast
-						.makeText(this, "No front facing camera found.", Toast.LENGTH_LONG)
-						.show();
+				Toast.makeText(this, "No front facing camera found.",
+						Toast.LENGTH_LONG).show();
 			} else {
 				camera = Camera.open(cameraId);
 			}
@@ -293,12 +303,16 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				camera.takePicture(null, null,
-						new PhotoHandler(getApplicationContext()));
+				camera.startPreview();
+
+				camera.takePicture(null, null, new PhotoHandler(
+						getApplicationContext()));
 
 			};
 
 		});
+
+		timerAlert();
 
 		Button bMood = (Button) findViewById(R.id.moodButton);
 		bMood.setOnClickListener(new OnClickListener() {
@@ -308,8 +322,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 				// TODO Auto-generated method stub
 				File root = Environment.getExternalStorageDirectory();
 				File moodFile = new File(root, "/moodplayer/mood.jpg");
-				File happyFile = new File(root, "/moodplayer/face_sad.jpg");
-				File sadFile = new File(root, "/moodplayer/face_happy.jpg");
+				File happyFile = new File(root, "/moodplayer/face_happy.jpg");
+				File sadFile = new File(root, "/moodplayer/face_sad.jpg");
 
 				Mat mMood = Highgui.imread(moodFile.getAbsolutePath(),
 						Highgui.CV_LOAD_IMAGE_GRAYSCALE);
@@ -331,21 +345,31 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 				mT = mMoodGray.t();
 				Core.flip(mT, mT, 0);
 
-				FdActivity.mNativeDetector.detect(mT, faces);
-				Highgui.imwrite(Environment.getExternalStorageDirectory().getPath()
-						+ "/moodplayer/mood2.jpg", mT);
-
-				Rect[] facesArray = faces.toArray();
-				if (facesArray.length != 0) {
-					face = mT.submat(facesArray[0]);
-					Toast.makeText(PlayerViewDemoActivity.this, "toast",
-							Toast.LENGTH_LONG).show();
-					TextView tvTop = (TextView) findViewById(R.id.topText);
-					tvTop.setText("happy " + Double.toString(compareProp(face, mHappy))
-							+ "sad " + Double.toString(compareProp(face, mSad)));
-
+				Rect half = new Rect(0, mT.rows() / 2, mT.cols(),
+						mT.rows() / 2 - 10);
+				mT = mT.submat(half);
+				while (true) {
+					FdActivity.mNativeDetector.detect(mT, faces);
 					// Highgui.imwrite(Environment.getExternalStorageDirectory().getPath()
-					// + "/moodplayer/mood2.jpg", face);
+					// + "/moodplayer/mood2.jpg", mT);
+
+					Rect[] facesArray = faces.toArray();
+					if (facesArray.length != 0) {
+						face = mT.submat(facesArray[0]);
+						Toast.makeText(PlayerViewDemoActivity.this, "toast",
+								Toast.LENGTH_LONG).show();
+						TextView tvTop = (TextView) findViewById(R.id.topText);
+						/*
+						 * tvTop.setText("happy " +
+						 * Double.toString(compareProp(face, mHappy)) + "sad " +
+						 * Double.toString(compareProp(face, mSad)));
+						 */
+
+						Highgui.imwrite(Environment
+								.getExternalStorageDirectory().getPath()
+								+ "/moodplayer/mood2.jpg", face);
+						break;
+					}
 
 				}
 			}
@@ -400,8 +424,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 					Playlist p = new Playlist(songs);
 					player.loadVideos(p.playlist);
 				} else {
-					Toast.makeText(PlayerViewDemoActivity.this, "Please turn wi-fi on",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(PlayerViewDemoActivity.this,
+							"Please turn wi-fi on", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -438,4 +462,90 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		}
 		super.onPause();
 	}
+
+	public void showalert() {
+
+		// Toast.makeText(PlayerViewDemoActivity.this, "timer",
+		// Toast.LENGTH_SHORT).show();
+		// camera.startPreview();
+		if (camera != null) {
+			camera.startPreview();
+			camera.takePicture(null, null, new PhotoHandler(
+					getApplicationContext()));
+
+			File root = Environment.getExternalStorageDirectory();
+			File moodFile = new File(root, "/moodplayer/mood.jpg");
+			File happyFile = new File(root, "/moodplayer/face_happy.jpg");
+			File sadFile = new File(root, "/moodplayer/face_sad.jpg");
+
+			Mat mMood = Highgui.imread(moodFile.getAbsolutePath(),
+					Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+			mHappy = Highgui.imread(happyFile.getAbsolutePath(),
+					Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+			mSad = Highgui.imread(sadFile.getAbsolutePath(),
+					Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+
+			// 10130 diferite
+			// 2998 aproape la fel
+			// 0 identice
+
+			face = null;
+			Mat mT;
+			Mat mMoodGray = Highgui.imread(moodFile.getAbsolutePath(),
+					Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+			MatOfRect faces = new MatOfRect();
+
+			mT = mMoodGray.t();
+			Core.flip(mT, mT, 0);
+
+			Rect half = new Rect(0, mT.rows() / 2, mT.cols(),
+					mT.rows() / 2 - 10);
+			mT = mT.submat(half);
+
+			long startTime = System.currentTimeMillis();
+			long threshold = 5000;
+
+			while (true) {
+				FdActivity.mNativeDetector.detect(mT, faces);
+				// Highgui.imwrite(Environment.getExternalStorageDirectory().getPath()
+				// + "/moodplayer/mood2.jpg", mT);
+
+				Rect[] facesArray = faces.toArray();
+				if (facesArray.length != 0) {
+					face = mT.submat(facesArray[0]);
+					Toast.makeText(PlayerViewDemoActivity.this, "toast",
+							Toast.LENGTH_LONG).show();
+					TextView tvTop = (TextView) findViewById(R.id.topText);
+					
+					  tvTop.setText("happy " +
+					  Double.toString(compareProp(face, mHappy)) + "sad " +
+					  Double.toString(compareProp(face, mSad)));
+					 
+
+					Highgui.imwrite(Environment.getExternalStorageDirectory()
+							.getPath() + "/moodplayer/mood2.jpg", face);
+					break;
+				} else if (System.currentTimeMillis() - startTime >= threshold) {
+
+					break;
+
+				}
+
+			}
+		}
+
+	}
+
+	public void timerAlert() {
+
+		final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			public void run() {
+				showalert();
+				handler.postDelayed(this, 10000);
+			}
+		}, 5000);
+
+	}
+
 }
