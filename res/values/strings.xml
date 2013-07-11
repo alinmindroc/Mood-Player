@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Mood Based Player</string>
+    <string name="app_name">Mood Player</string>
      <string name="youtube_api_demo">Mood Player</string>
 
     <string name="videowall_demo_name">Video Wall</string>
@@ -45,7 +45,12 @@
 
     <string name="error_thumbnail_view">There was an error initializing the YouTubeThumbnailView (%1$s)</string>
     <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
-    <string name="mood3">Excited/Bored</string>
-    <string name="mood1">Happy/Sad</string>
-    <string name="mood2">Calm/Angry</string>
+    <string name="mood2">Excited</string>
+    <string name="mood1">Calm</string>
+    <string name="toptext">Let\'s play your mood!</string>
+    <string name="playlistbutton">Get playlist</string>
+    <string name="fdcheckbox">Face detection</string>
+    <string name="fdtv">Please wait for the red rectangle, then make a sad face</string>
+    <string name="fdbtn">Take sad picture</string>
+    
 </resources>

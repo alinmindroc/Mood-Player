@@ -11,30 +11,29 @@ import android.widget.Toast;
 
 public class PhotoHandler implements PictureCallback {
 
-  private final Context context;
+	private final Context context;
 
-  public PhotoHandler(Context context) {
-    this.context = context;
-  }
+	public PhotoHandler(Context context) {
+		this.context = context;
+	}
 
-  @Override
-  public void onPictureTaken(byte[] data, Camera camera) {
+	@Override
+	public void onPictureTaken(byte[] data, Camera camera) {
 
-    String photoFile = "mood.jpg";
+		String photoFile = "mood.jpg";
 
-    String filename = Environment.getExternalStorageDirectory().getPath() + "/moodplayer/" + photoFile;
+		String filename = Environment.getExternalStorageDirectory().getPath()
+				+ "/moodplayer/" + photoFile;
 
-    File pictureFile = new File(filename);
+		File pictureFile = new File(filename);
 
-    try {
-      FileOutputStream fos = new FileOutputStream(pictureFile);
-      fos.write(data);
-      fos.close();
-      Toast.makeText(context, "New Image saved: " + photoFile,
-          Toast.LENGTH_LONG).show();
-    } catch (Exception error) {
-      Toast.makeText(context, "Image could not be saved.",
-          Toast.LENGTH_LONG).show();
-    }
-  }
-} 
+		try {
+			FileOutputStream fos = new FileOutputStream(pictureFile);
+			fos.write(data);
+			fos.close();
+		} catch (Exception error) {
+			Toast.makeText(context, "Image could not be saved.", Toast.LENGTH_LONG)
+					.show();
+		}
+	}
+}

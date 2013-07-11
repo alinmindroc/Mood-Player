@@ -25,18 +25,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Let&apos;s play your mood!" />
+        android:text="@string/toptext" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Get playlist" />
     </LinearLayout>
 
     <RelativeLayout
@@ -64,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/gaugeImage"
             android:layout_alignParentLeft="true"
-            android:text="Calm" />
+            android:text="@string/mood1" />
 
         <TextView
             android:id="@+id/textView2"
@@ -72,21 +66,12 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/gaugeImage"
             android:layout_alignParentRight="true"
-            android:text="Excited" />
+            android:text="@string/mood2" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-
-        <CheckBox
-            android:id="@+id/checkBox1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="19dp"
-            android:text="Face detection" />
 
         <ImageView
             android:id="@+id/hapyFace"
@@ -101,10 +86,25 @@
             android:id="@+id/sadFace"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_alignLeft="@+id/imageView1"
-            android:layout_below="@+id/imageView1"
             android:layout_marginTop="17dp"
             android:src="@drawable/sad_bw" />
+
+        <CheckBox
+            android:id="@+id/checkBox1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/hapyFace"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="16dp"
+            android:text="@string/fdcheckbox" />
+
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/checkBox1"
+            android:layout_below="@+id/sadFace"
+            android:text="@string/playlistbutton" />
     </RelativeLayout>
 
     <com.google.android.youtube.player.YouTubePlayerView

@@ -76,7 +76,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	private YouTubePlayer player;
 	private ArrayList<String> songs;
 	private Mat mSad, mHappy, mMoodGray;
-	private MenuItem mDeleteTrainingSet, mExit;
+	private MenuItem mDeleteTrainingSet, mExit, mChooseThreshold;
 	private File root, moodFile, happyFile, sadFile;
 	private TextView tvTop;
 	private FaceDetectAsyncTask detect;
@@ -84,6 +84,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	private Button playListButton;
 	private ImageView sadImage, happyImage;
 	final Drawable gauges[] = new Drawable[16];
+	static long faceDetectThreshold = 5000;// don't change it unless you are a
+																					// moron
 
 	// update playlist
 	public void setIdArray() {
@@ -200,6 +202,9 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		gauges[13] = getResources().getDrawable(R.drawable.gauge14);
 		gauges[14] = getResources().getDrawable(R.drawable.gauge15);
 		gauges[15] = getResources().getDrawable(R.drawable.gauge16);
+
+		setContentView(R.layout.playerview_demo);
+
 	}
 
 	private int findFrontFacingCamera() {
@@ -235,7 +240,6 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		}
 		camera.startPreview();
 
-		setContentView(R.layout.playerview_demo);
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
@@ -338,7 +342,6 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		});
 
 		timerAlert();
-
 	}
 
 	public String getMood(Mat face, Mat mSad, Mat mHappy) {
@@ -436,6 +439,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		mDeleteTrainingSet = menu.add("Delete training photo set");
+		mChooseThreshold = menu.add("Help / settings");
 		mExit = menu.add("Quit application");
 		return true;
 	}
@@ -458,6 +462,12 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			finish();
 		}
 
+		else if (item == mChooseThreshold) {
+			Intent settings = new Intent(PlayerViewDemoActivity.this,
+					HintActivity.class);
+			startActivity(settings);
+		}
+
 		else if (item == mExit) {
 			finish();
 		}
@@ -466,12 +476,21 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	}
 
 	public void runDetection() {
+		moodFile = new File(root, "/moodplayer/mood.jpg");
 
-		if (camera != null) {
-
-			TakePhotoAsyncTask getPhoto = new TakePhotoAsyncTask(camera, PlayerViewDemoActivity.this);
+		if (moodFile.exists() == false) {
+			// la prima rulare a aplicatiei crapa, cum nu are timp sa faca poza
+			TakePhotoAsyncTask getPhoto = new TakePhotoAsyncTask(camera,
+					PlayerViewDemoActivity.this);
 			getPhoto.execute();
-			
+		}
+
+		else if (camera != null) {
+
+			TakePhotoAsyncTask getPhoto = new TakePhotoAsyncTask(camera,
+					PlayerViewDemoActivity.this);
+			getPhoto.execute();
+
 			mHappy = Highgui.imread(happyFile.getAbsolutePath(),
 					Highgui.CV_LOAD_IMAGE_GRAYSCALE);
 			mSad = Highgui.imread(sadFile.getAbsolutePath(),
@@ -533,9 +552,9 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			public void run() {
 				if (faceDetection == true)
 					runDetection();
-				handler.postDelayed(this, 15000);
+				handler.postDelayed(this, faceDetectThreshold);
 			}
-		}, 10000);
+		}, 6000);
 
 	}
 

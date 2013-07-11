@@ -29,6 +29,12 @@
             android:label="player"
             android:screenOrientation="nosensor" >
         </activity>
+        <activity
+            android:name="HintActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="player"
+            android:screenOrientation="nosensor" >
+        </activity>
 
         <meta-data
             android:name="@string/isLaunchableActivity"

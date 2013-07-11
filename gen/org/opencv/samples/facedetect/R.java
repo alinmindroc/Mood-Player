@@ -65,25 +65,36 @@ containing a value of this type.
         public static final int any=0x7f050000;
         public static final int bSwitch=0x7f050005;
         public static final int back=0x7f050001;
-        public static final int button1=0x7f050008;
-        public static final int checkBox1=0x7f05000d;
+        public static final int button1=0x7f05000f;
+        public static final int checkBox1=0x7f05000e;
         public static final int fd_activity_surface_view=0x7f050004;
         public static final int front=0x7f050002;
-        public static final int gaugeImage=0x7f050009;
-        public static final int hapyFace=0x7f05000e;
-        public static final int imageView1=0x7f050010;
+        public static final int gaugeImage=0x7f050008;
+        public static final int hapyFace=0x7f05000c;
         public static final int player_view=0x7f050003;
-        public static final int sadFace=0x7f05000f;
-        public static final int seekBar1=0x7f05000a;
-        public static final int textView2=0x7f05000c;
-        public static final int textView3=0x7f05000b;
+        public static final int radio15sec=0x7f050017;
+        public static final int radio2sec=0x7f050014;
+        public static final int radio5sec=0x7f050015;
+        public static final int radioButton1=0x7f050016;
+        public static final int radioButton2=0x7f050018;
+        public static final int radioGroup=0x7f050013;
+        public static final int sadFace=0x7f05000d;
+        public static final int seekBar1=0x7f050009;
+        public static final int textView1=0x7f050012;
+        public static final int textView2=0x7f05000b;
+        public static final int textView3=0x7f05000a;
+        public static final int textView4=0x7f050019;
+        public static final int textView5=0x7f05001a;
+        public static final int textView6=0x7f05001b;
+        public static final int textView7=0x7f050011;
         public static final int topText=0x7f050007;
         public static final int topTextView=0x7f050006;
-        public static final int youtube_view=0x7f050011;
+        public static final int youtube_view=0x7f050010;
     }
     public static final class layout {
         public static final int face_detect_surface_view=0x7f030000;
         public static final int playerview_demo=0x7f030001;
+        public static final int settings=0x7f030002;
     }
     public static final class raw {
         public static final int great=0x7f040000;
@@ -110,6 +121,9 @@ containing a value of this type.
         public static final int enter_fullscreen=0x7f060022;
         public static final int error_player=0x7f060026;
         public static final int error_thumbnail_view=0x7f060025;
+        public static final int fdbtn=0x7f06002d;
+        public static final int fdcheckbox=0x7f06002b;
+        public static final int fdtv=0x7f06002c;
         public static final int fragment_demo_name=0x7f060008;
         public static final int fullscreen_demo_name=0x7f06000b;
         public static final int fullscreen_tutorial=0x7f060021;
@@ -123,8 +137,7 @@ containing a value of this type.
         public static final int minVersion=0x7f060000;
         public static final int minimal=0x7f060016;
         public static final int mood1=0x7f060028;
-        public static final int mood2=0x7f060029;
-        public static final int mood3=0x7f060027;
+        public static final int mood2=0x7f060027;
         public static final int pause=0x7f060011;
         public static final int play=0x7f060010;
         public static final int play_playlist=0x7f060019;
@@ -134,11 +147,13 @@ containing a value of this type.
         public static final int playerfragment_text=0x7f06000e;
         public static final int playerview_demo_name=0x7f060007;
         public static final int playerview_text=0x7f06000d;
+        public static final int playlistbutton=0x7f06002a;
         public static final int seconds=0x7f060013;
         public static final int skip_to=0x7f060012;
         public static final int standalone_player_demo_name=0x7f060006;
         public static final int start_index=0x7f06001a;
         public static final int start_time=0x7f06001b;
+        public static final int toptext=0x7f060029;
         public static final int videowall_demo_name=0x7f060005;
         public static final int youtube_api_demo=0x7f060004;
         public static final int youtube_not_installed=0x7f060020;
