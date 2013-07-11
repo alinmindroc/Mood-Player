@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.Core;
@@ -32,8 +34,12 @@ import org.opencv.core.Rect;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
@@ -42,6 +48,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,12 +62,28 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.android.DialogError;
+import com.facebook.android.Facebook;
+import com.facebook.android.FacebookError;
+import com.facebook.android.SessionStore;
+import com.facebook.android.Facebook.DialogListener;
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
 import com.google.android.youtube.player.YouTubePlayerView;
+import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
 
 public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		implements CvCameraViewListener2 {
+
+	private Facebook mFacebook;
+	private CheckBox mFacebookBtn;
+	private ProgressDialog mProgress;
+
+	private static final String[] PERMISSIONS = new String[] { "publish_stream",
+			"read_stream", "offline_access" };
+
+	private static final String APP_ID = "482636805164043";
 
 	private int cameraId = 0;
 	private int progress1;
@@ -69,6 +92,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 
 	private String htmlSource1, htmlSource2;
 	private String currentMood = "happy";
+	private String currentSong;
 
 	private Mat mGray;
 	private Mat mRgba;
@@ -85,7 +109,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	private ImageView sadImage, happyImage;
 	final Drawable gauges[] = new Drawable[16];
 	static long faceDetectThreshold = 5000;// don't change it unless you are a
-																					// moron
+
+	// moron
 
 	// update playlist
 	public void setIdArray() {
@@ -166,11 +191,24 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		if (tag.equals("happy%20hardcore")) {
 			return R.raw.happy_hardcore;
 		}
-		if (tag.equals("sad%20mood")) {
-			return R.raw.sad_mood;
+		if (tag.equals("sad%20songs")) {
+			return R.raw.sad_songs;
 		}
 		if (tag.equals("sad")) {
 			return R.raw.sad;
+		}
+		if (tag.equals("songs%20that%20make%20me%20happy")) {
+			return R.raw.songs_that_make_me_happy;
+
+		}
+		if (tag.equals("angry")) {
+			return R.raw.angry;
+		}
+		if (tag.equals("calm-peaceful")) {
+			return R.raw.calm_peaceful;
+		}
+		if (tag.equals("sad%20and%20slow")) {
+			return R.raw.sad_and_slow;
 		}
 		return 0;
 	}
@@ -202,7 +240,6 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		gauges[13] = getResources().getDrawable(R.drawable.gauge14);
 		gauges[14] = getResources().getDrawable(R.drawable.gauge15);
 		gauges[15] = getResources().getDrawable(R.drawable.gauge16);
-
 		setContentView(R.layout.playerview_demo);
 
 	}
@@ -240,6 +277,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		}
 		camera.startPreview();
 
+		setContentView(R.layout.playerview_demo);
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
@@ -307,8 +345,10 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if (isChecked)
 					faceDetection = true;
-				else
+				else {
+					tvTop.setText("Let`s play your mood!");
 					faceDetection = false;
+				}
 			}
 		});
 
@@ -323,6 +363,8 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 					happyImage.setImageDrawable(getResources().getDrawable(
 							R.drawable.happy));
 					happyImage.bringToFront();
+					currentMood = new String("happy");
+					setIdArray();
 				}
 			}
 		});
@@ -337,11 +379,38 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 					happyImage.setImageDrawable(getResources().getDrawable(
 							R.drawable.happy_bw));
 					sadImage.bringToFront();
+					currentMood = new String("sad");
+					setIdArray();
 				}
 			}
 		});
 
 		timerAlert();
+
+		mFacebookBtn = (CheckBox) findViewById(R.id.cb_facebook);
+
+		mProgress = new ProgressDialog(this);
+		mFacebook = new Facebook(APP_ID);
+
+		SessionStore.restore(mFacebook, this);
+
+		if (mFacebook.isSessionValid()) {
+			mFacebookBtn.setChecked(true);
+
+			String name = SessionStore.getName(this);
+			name = (name.equals("")) ? "Unknown" : name;
+
+			mFacebookBtn.setText("  Facebook (" + name + ")");
+			mFacebookBtn.setTextColor(Color.WHITE);
+		}
+
+		mFacebookBtn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onFacebookClick();
+			}
+		});
+
 	}
 
 	public String getMood(Mat face, Mat mSad, Mat mHappy) {
@@ -383,6 +452,44 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		this.player = player;
 		if (!wasRestored) {
 			playVideoAtSelection();
+			player.setPlayerStateChangeListener(new PlayerStateChangeListener() {
+
+				@Override
+				public void onVideoStarted() {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void onVideoEnded() {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void onLoading() {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void onLoaded(String arg0) {
+					currentSong = "http://www.youtube.com/watch?v=" + arg0;
+
+				}
+
+				@Override
+				public void onError(ErrorReason arg0) {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void onAdStarted() {
+					// TODO Auto-generated method stub
+
+				}
+			});
 		}
 	}
 
@@ -407,20 +514,29 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 	public String getTag() {
 
 		if (currentMood.equals("happy")) {
-			if (progress1 < 50) {
+			if (progress1 <= 25)
+				return "calm-peaceful";
+			if (progress1 > 25 && progress1 <= 50)
 				return "happy";
-			} else {
+			if (progress1 > 50 && progress1 <= 75)
+				return "songs%20that%20make%20me%20happy";
+			if (progress1 > 75 && progress1 <= 100)
 				return "happy%20hardcore";
-			}
-		} else {
-			if (progress1 < 50) {
-				return "sad%20mood";
-			} else {
-				return "sad";
-			}
 
 		}
 
+		if (currentMood.equals("sad")) {
+			if (progress1 <= 25)
+				return "sad%20and%20slow";
+			if (progress1 > 25 && progress1 <= 50)
+				return "sad%20songs";
+			if (progress1 > 50 && progress1 <= 75)
+				return "sad";
+			if (progress1 > 75 && progress1 <= 100)
+				return "angry";
+
+		}
+		return currentMood;
 	}
 
 	@Override
@@ -521,6 +637,7 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 					new FaceDetectAsyncTask.MyCallBack() {
 						public void run(String mood) {
 							currentMood = new String(mood);
+							setIdArray();
 							tvTop.setText("You seem " + mood);
 							happyImage = (ImageView) findViewById(R.id.hapyFace);
 							sadImage = (ImageView) findViewById(R.id.sadFace);
@@ -557,5 +674,120 @@ public class PlayerViewDemoActivity extends YouTubeFailureRecoveryActivity
 		}, 6000);
 
 	}
+	private void onFacebookClick() {
+		if (mFacebook.isSessionValid()) {
+			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			// final AlertDialog alert = builder.create();
+
+			// alert.show();
+			Intent share = new Intent(PlayerViewDemoActivity.this,
+					TestPost.class);
+			share.putExtra("toShare", currentSong);
+			startActivity(share);
+
+		} else {
+			mFacebookBtn.setChecked(false);
+			mFacebook.authorize(this, PERMISSIONS, -1,
+					new FbLoginDialogListener());
+		}
+	}
+
+	private final class FbLoginDialogListener implements DialogListener {
+		public void onComplete(Bundle values) {
+			SessionStore.save(mFacebook, PlayerViewDemoActivity.this);
+
+			mFacebookBtn.setText("  Facebook (No Name)");
+			mFacebookBtn.setChecked(true);
+			mFacebookBtn.setTextColor(Color.WHITE);
+
+			getFbName();
+		}
+
+		public void onFacebookError(FacebookError error) {
+			Toast.makeText(PlayerViewDemoActivity.this,
+					"Facebook connection failed", Toast.LENGTH_SHORT).show();
+
+			mFacebookBtn.setChecked(false);
+		}
+
+		public void onError(DialogError error) {
+			Toast.makeText(PlayerViewDemoActivity.this,
+					"Facebook connection failed", Toast.LENGTH_SHORT).show();
+
+			mFacebookBtn.setChecked(false);
+		}
+
+		public void onCancel() {
+			mFacebookBtn.setChecked(false);
+		}
+	}
+
+	private void getFbName() {
+		mProgress.setMessage("Finalizing ...");
+		mProgress.show();
+
+		new Thread() {
+			@Override
+			public void run() {
+				String name = "";
+				int what = 1;
+
+				try {
+					String me = mFacebook.request("me");
+
+					JSONObject jsonObj = (JSONObject) new JSONTokener(me)
+							.nextValue();
+					name = jsonObj.getString("name");
+					what = 0;
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+				mFbHandler.sendMessage(mFbHandler.obtainMessage(what, name));
+			}
+		}.start();
+	}
+
+	private Handler mFbHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			mProgress.dismiss();
+
+			if (msg.what == 0) {
+				String username = (String) msg.obj;
+				username = (username.equals("")) ? "No Name" : username;
+
+				SessionStore.saveName(username, PlayerViewDemoActivity.this);
+
+				mFacebookBtn.setText("  Facebook (" + username + ")");
+
+				Toast.makeText(PlayerViewDemoActivity.this,
+						"Connected to Facebook as " + username,
+						Toast.LENGTH_SHORT).show();
+			} else {
+				Toast.makeText(PlayerViewDemoActivity.this,
+						"Connected to Facebook", Toast.LENGTH_SHORT).show();
+			}
+		}
+	};
+
+	private Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			mProgress.dismiss();
+
+			if (msg.what == 1) {
+				Toast.makeText(PlayerViewDemoActivity.this,
+						"Facebook logout failed", Toast.LENGTH_SHORT).show();
+			} else {
+				mFacebookBtn.setChecked(false);
+				mFacebookBtn.setTextColor(Color.GRAY);
+
+				Toast.makeText(PlayerViewDemoActivity.this,
+						"Disconnected from Facebook", Toast.LENGTH_SHORT)
+						.show();
+			}
+		}
+	};
 
 }

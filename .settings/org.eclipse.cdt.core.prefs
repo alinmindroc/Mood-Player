@@ -1,6 +1,9 @@
 eclipse.preferences.version=1
 environment/project/0.129633445/NDKROOT/delimiter=;
 environment/project/0.129633445/NDKROOT/operation=replace
-environment/project/0.129633445/NDKROOT/value=C\:\\Users\\Alin\\Desktop\\android-ndk-r8e-windows-x86_64\\android-ndk-r8e
+environment/project/0.129633445/NDKROOT/value=C\:\\Users\\roberta\\Downloads\\android-ndk\\android-ndk-r8e
+environment/project/0.129633445/PATH/delimiter=;
+environment/project/0.129633445/PATH/operation=append
+environment/project/0.129633445/PATH/value=C\:\\Users\\roberta\\Downloads\\android-ndk\\android-ndk-r8e
 environment/project/0.129633445/append=true
 environment/project/0.129633445/appendContributed=true

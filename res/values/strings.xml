@@ -45,7 +45,7 @@
 
     <string name="error_thumbnail_view">There was an error initializing the YouTubeThumbnailView (%1$s)</string>
     <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
-    <string name="mood2">Excited</string>
+    <string name="mood2">Energetic</string>
     <string name="mood1">Calm</string>
     <string name="toptext">Let\'s play your mood!</string>
     <string name="playlistbutton">Get playlist</string>

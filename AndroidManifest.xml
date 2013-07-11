@@ -35,6 +35,13 @@
             android:label="player"
             android:screenOrientation="nosensor" >
         </activity>
+        <activity
+            android:name="TestPost"
+            android:label="share" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
 
         <meta-data
             android:name="@string/isLaunchableActivity"

@@ -18,6 +18,7 @@
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/back"
     android:orientation="vertical" >
 
     <TextView
@@ -25,12 +26,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/toptext" />
+        android:text="@string/toptext"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
+
+        <CheckBox
+            android:id="@+id/cb_facebook"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:button="@drawable/btn_check_facebook"
+            android:clickable="true"
+            android:focusable="true"
+            android:textColor="#ccc"
+            android:textSize="14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <RelativeLayout
@@ -39,8 +53,8 @@
 
         <ImageView
             android:id="@+id/gaugeImage"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:src="@drawable/gauge1" />
@@ -74,18 +88,9 @@
         android:layout_height="wrap_content" >
 
         <ImageView
-            android:id="@+id/hapyFace"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="30dp"
-            android:src="@drawable/happy_bw" />
-
-        <ImageView
             android:id="@+id/sadFace"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_marginTop="17dp"
             android:src="@drawable/sad_bw" />
 
@@ -93,24 +98,40 @@
             android:id="@+id/checkBox1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/hapyFace"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="16dp"
+            android:layout_alignParentTop="true"
             android:text="@string/fdcheckbox" />
 
         <Button
             android:id="@+id/button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/checkBox1"
-            android:layout_below="@+id/sadFace"
+            android:layout_alignBottom="@+id/sadFace"
+            android:layout_alignParentRight="true"
             android:text="@string/playlistbutton" />
+
+        <ImageView
+            android:id="@+id/hapyFace"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="70dp"
+            android:src="@drawable/happy_bw" />
+
     </RelativeLayout>
 
     <com.google.android.youtube.player.YouTubePlayerView
         android:id="@+id/youtube_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_weight="1.0" >
     </com.google.android.youtube.player.YouTubePlayerView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </RelativeLayout>
 
 </LinearLayout>
