@@ -20,11 +20,10 @@ public class ServerFetchAsyncTask extends AsyncTask<String, Void, String[]> {
 	MyCallBack callBack;
 	String source1, source2;
 	String page2 = "?page=2";
-	
+
 	String sourcev[] = new String[2];
 
-	public ServerFetchAsyncTask(String str, Activity context,
-			MyCallBack callBack) {
+	public ServerFetchAsyncTask(String str, Activity context, MyCallBack callBack) {
 		this.str = str;
 		this.mContext = context;
 		this.callBack = callBack;
@@ -40,8 +39,8 @@ public class ServerFetchAsyncTask extends AsyncTask<String, Void, String[]> {
 		HttpClient client2 = new DefaultHttpClient();
 		try {
 			HttpResponse response1 = client1.execute(request1);
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					response1.getEntity().getContent()));
+			BufferedReader br = new BufferedReader(new InputStreamReader(response1
+					.getEntity().getContent()));
 			StringBuffer buffer = new StringBuffer();
 			String line = null;
 			while ((line = br.readLine()) != null)
@@ -54,11 +53,11 @@ public class ServerFetchAsyncTask extends AsyncTask<String, Void, String[]> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		try {
 			HttpResponse response2 = client2.execute(request2);
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					response2.getEntity().getContent()));
+			BufferedReader br = new BufferedReader(new InputStreamReader(response2
+					.getEntity().getContent()));
 			StringBuffer buffer = new StringBuffer();
 			String line = null;
 			while ((line = br.readLine()) != null)
@@ -71,21 +70,25 @@ public class ServerFetchAsyncTask extends AsyncTask<String, Void, String[]> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		sourcev[0] = source1;
 		sourcev[1] = source2;
-		
+
 		return sourcev;
 	}
 
 	protected void onPostExecute(String[] str) {
-		callBack.run(str);
-		/*
-		TextView lala = (TextView) this.mContext.findViewById(R.id.source);
-		lala.setMovementMethod(new ScrollingMovementMethod());
-		lala.setText(this.str);
-		*/
+		try {
+			callBack.run(str);
+		} catch (Exception e) {
+			//TODO: catch exception
 		}
+		/*
+		 * TextView lala = (TextView) this.mContext.findViewById(R.id.source);
+		 * lala.setMovementMethod(new ScrollingMovementMethod());
+		 * lala.setText(this.str);
+		 */
+	}
 
 	public static class MyCallBack {
 		public void run(String[] s) {
