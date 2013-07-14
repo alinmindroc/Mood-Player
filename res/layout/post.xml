@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding="10dp" >
+
+    <EditText
+        android:id="@+id/revieew"
+        android:layout_width="250dp"
+        android:layout_height="100dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/button_submit"
+        android:layout_marginTop="15dp"
+        android:hint="Say something about your mood..." />
+
+    <Button
+        android:id="@+id/button_logout"
+        android:layout_width="122dp"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/revieew"
+        android:layout_below="@+id/revieew"
+        android:layout_marginTop="21dp"
+        android:background="#3B5998"
+        android:text="Logout" />
+
+    <Button
+        android:id="@+id/button_submit"
+        android:layout_width="122dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/button_logout"
+        android:layout_alignBottom="@+id/button_logout"
+        android:layout_alignParentRight="true"
+        android:background="#3B5998"
+        android:text="Share" />
+
+</RelativeLayout>

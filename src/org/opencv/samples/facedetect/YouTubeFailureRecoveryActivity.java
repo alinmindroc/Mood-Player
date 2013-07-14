@@ -16,6 +16,8 @@
 
 package org.opencv.samples.facedetect;
 
+import org.opencv.samples.facedetect.R;
+
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;

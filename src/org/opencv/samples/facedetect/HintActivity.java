@@ -1,5 +1,7 @@
 package org.opencv.samples.facedetect;
 
+import org.opencv.samples.facedetect.R;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.RadioButton;

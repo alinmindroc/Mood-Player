@@ -17,6 +17,7 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
+import org.opencv.samples.facedetect.R;
 
 import android.app.Activity;
 import android.content.Context;

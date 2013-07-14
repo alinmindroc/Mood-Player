@@ -23,6 +23,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import ncit.android.moodplayer.DialogError;
+import ncit.android.moodplayer.Facebook;
+import ncit.android.moodplayer.FacebookError;
+import ncit.android.moodplayer.SessionStore;
+import ncit.android.moodplayer.Facebook.DialogListener;
+
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -33,6 +39,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.samples.facedetect.R;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -62,11 +69,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.FacebookError;
-import com.facebook.android.SessionStore;
-import com.facebook.android.Facebook.DialogListener;
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
