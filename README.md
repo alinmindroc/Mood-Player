@@ -1,9 +1,9 @@
 facedetection
 =============
-Android app which uses face detection to get your mood and generates a youtube plsylist.
+Android app which uses face detection to get your mood and generates a youtube playlist.
 
 Build instructions:
-project path should be like:
+project path should look like:
 
 C:\Users\Alin\Desktop\OpenCV-2.4.5-android-sdk\OpenCV-2.4.5-android-sdk\samples
 for the native code to build succesfully. If the path is different, you have to
