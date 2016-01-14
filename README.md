@@ -1,4 +1,4 @@
-facedetection
+Mood Player
 =============
 Android app which uses face detection to get your mood and generates a youtube playlist.
 
